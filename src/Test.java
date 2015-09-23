@@ -4,7 +4,7 @@ import com.github.cyl.autonews.dao.quotation.QuotationDao;
 import com.github.cyl.autonews.pojo.analysis.Article;
 import com.github.cyl.autonews.pojo.cpi.MonthCPI;
 //import com.yicai.autonews.cvsfile.CSVFileUtil;
-import com.yicai.autonews.cvsfile.QuotationCsvFileExport;
+import com.yicai.autonews.cvsfile.CsvFileExport;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -29,9 +29,9 @@ public class Test {
 		for(int i = 0; i < list.size(); i++){
 			System.out.println(list.get(i));
 		}
-		QuotationCsvFileExport quotationExport = new QuotationCsvFileExport() ;
+		CsvFileExport quotationExport = new CsvFileExport() ;
 		String outpath = "quotations.csv";
-		quotationExport.exportQuotationsToCsv(list, outpath);
+		//quotationExport.exportQuotationsToCsv(list, outpath);
 	
 
 

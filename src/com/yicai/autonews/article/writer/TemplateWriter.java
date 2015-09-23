@@ -10,7 +10,9 @@ import com.github.cyl.autonews.pojo.analysis.Sentence;
 import com.github.cyl.autonews.pojo.cpi.MonthCPI;
 import com.github.cyl.autonews.pojo.ppi.MonthPPI;
 import com.yicai.autonews.staticclass.MyDate;
-import com.yicai.autonews.calculation.IndicatorYoyComparator;
+import com.yicai.autonews.calculation.IndividualIndicator;
+import com.yicai.autonews.calculation.IndividualIndicatorComparison;
+import com.yicai.autonews.calculation.IndividualIndicatorYoyComparator;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ public class TemplateWriter {
 	private List<MonthPPI> historicalMonthPPIList; 
 	private MonthCPI curMonthCPI; 
 	private MonthPPI curMonthPPI;
+	final int yearToMonth = 12;
 	public TemplateWriter(){
 	}
 	public TemplateWriter(List<MonthCPI> historicalMonthCPIList, List<MonthPPI> historicalMonthPPIList,
@@ -36,11 +39,10 @@ public class TemplateWriter {
 	}
 	
 	public String articleTitleGenerator(){
-		//int year = 2015; 
-		//int month = 5;
-		String title = null;
-		/*List<String> titleTemplate;
-		titleTemplate.add();*/
+
+		String title = "";
+		// 如果有至少一个月 的历史数据，就和历史数据比比，如果没有，不做比较
+		if (historicalMonthCPIList.size() >= 1){ 
 	       MonthCPI lastMonthCPI = historicalMonthCPIList.get(historicalMonthCPIList.size()-1);
 	        
 	        if(curMonthCPI.getYoy() >= 2 && curMonthCPI.getYoy() <3){
@@ -51,23 +53,35 @@ public class TemplateWriter {
 	        	}else{
 	        		title = "CPI涨幅回落";
 	        	}
-	        }else if(curMonthCPI.getYoy() < 2 && curMonthCPI.getYoy() > 0){
+	        }else if(curMonthCPI.getYoy() < 2 && curMonthCPI.getYoy() >= 1){
 	        	if(curMonthCPI.getYoy() > lastMonthCPI.getYoy()){
-	        		if (lastMonthCPI.getYoy() > 2){
-	        			title = "物价持续温和上涨"; //2 加""
+	        		if (lastMonthCPI.getYoy() > 0){
+	        			title = "物价持续温和上涨"; 
 	        		}
 	        	}else{
 	        		title = "CPI涨幅回落";
 	        	}
 	        }else if(curMonthCPI.getYoy() <= 0){
 	        	if(curMonthCPI.getYoy() > lastMonthCPI.getYoy()){
-	        		title = "物价降幅收窄"; //2 加""
+	        		title = "物价降幅收窄"; 
 	        	}else{
-	        		title = "物价持续下行"; //2 加""
+	        		title = "物价持续下行"; 
 	        	}
+	        }else if(curMonthCPI.getYoy() < 1 && curMonthCPI.getYoy() > 0){
+	        	title = String.format("CPI同比仅%s增加通缩担忧", trendOfVariation(curMonthCPI.getYoy()));	
 	        }else{
-	        	
+	        	title = String.format("CPI同比%s", trendOfVariation(curMonthCPI.getYoy()));	
 	        }
+		}else{
+			if(curMonthCPI.getYoy() < 1){
+				title = String.format("CPI同比%s 增加通缩担忧", trendOfVariation(curMonthCPI.getYoy()));
+			}else if(curMonthCPI.getYoy() < 2){
+				title = String.format("CPI同比%s 物价温和上涨", trendOfVariation(curMonthCPI.getYoy()));
+			}else{
+				title = String.format("CPI同比%s", trendOfVariation(curMonthCPI.getYoy()));
+			}
+			
+		}
 
 		return title;
 	}
@@ -76,117 +90,89 @@ public class TemplateWriter {
 		//historicalM;
         Paragraph firstParagraph = new Paragraph();
         List<Sentence> sentenceList = new ArrayList<Sentence>(); 
-       MonthCPI lastMonthCPI = historicalMonthCPIList.get(historicalMonthCPIList.size()-1);
-       String str = null;
-        
+       
+       String str = "";
+       if(historicalMonthCPIList.size() >= 1){
+    	   MonthCPI lastMonthCPI = historicalMonthCPIList.get(historicalMonthCPIList.size()-1);
         if(curMonthCPI.getYoy() >= 2 && curMonthCPI.getYoy() <3){
         	if(curMonthCPI.getYoy() > lastMonthCPI.getYoy()){
         		if (lastMonthCPI.getYoy() < 2){
-        			str = String.format("根据国家统计局公布的数据显示,%d月份居民消费价格指数CPI同比%s,比上月扩大%s个百分点,温和通胀趋势显现。",
-        	                MyDate.month,trendOfVariation(curMonthCPI.getYoy()),formatVariation(curMonthCPI.getYoy()-lastMonthCPI.getYoy()));
+        			str = String.format("根据国家统计局公布的数据显示，%d月份居民消费价格指数CPI同比%s，比上月扩大%s个百分点，温和通胀趋势显现。",
+        					curMonthCPI.getMonth(),trendOfVariation(curMonthCPI.getYoy()),formatVariation(curMonthCPI.getYoy()-lastMonthCPI.getYoy()));
         		}
         	}else{
-        		str = String.format("根据国家统计局公布的数据显示,%d月份居民消费价格指数CPI同比%s,比上月收窄%s个百分点,涨幅回落。",
-    	                MyDate.month,trendOfVariation(curMonthCPI.getYoy()),formatVariation(curMonthCPI.getYoy()-lastMonthCPI.getYoy()));
+        		str = String.format("根据国家统计局公布的数据显示，%d月份居民消费价格指数CPI同比%s，比上月收窄%s个百分点，涨幅回落。",
+        				curMonthCPI.getMonth(),trendOfVariation(curMonthCPI.getYoy()),formatVariation(curMonthCPI.getYoy()-lastMonthCPI.getYoy()));
         	}
+        }else if(curMonthCPI.getYoy() <= 1 && curMonthCPI.getYoy() > 0){
+	        str = String.format("根据国家统计局公布的数据显示，%d月份居民消费价格指数CPI同比%s，环比%s；%d月份的PPI同比%s，环比%s。",
+	        		curMonthCPI.getMonth(),trendOfVariation(curMonthCPI.getYoy()),trendOfVariation(curMonthCPI.getMom()),
+	        		curMonthCPI.getMonth(),trendOfVariation(curMonthPPI.getYoy()),trendOfVariation(curMonthPPI.getMom())
+	                );
         }else{
-	        str = String.format("根据国家统计局公布的数据显示,%d月份居民消费价格指数CPI同比%s,环比%s;%d月份的PPI同比%s,环比%s\n",
-	                MyDate.month,trendOfVariation(curMonthCPI.getYoy()),trendOfVariation(curMonthCPI.getMom()),
-	                MyDate.month,trendOfVariation(curMonthPPI.getYoy()),trendOfVariation(curMonthPPI.getMom())
+	        str = String.format("根据国家统计局公布的数据显示，%d月份居民消费价格指数CPI同比%s，环比%s；%d月份的PPI同比%s，环比%s。",
+	        		curMonthCPI.getMonth(),trendOfVariation(curMonthCPI.getYoy()),trendOfVariation(curMonthCPI.getMom()),
+	        		curMonthCPI.getMonth(),trendOfVariation(curMonthPPI.getYoy()),trendOfVariation(curMonthPPI.getMom())
 	                );
         }
+        }else{
+        	 str = String.format("根据国家统计局公布的数据显示，%d月份居民消费价格指数CPI同比%s，环比%s；%d月份的PPI同比%s，环比%s。",
+ 	        		curMonthCPI.getMonth(),trendOfVariation(curMonthCPI.getYoy()),trendOfVariation(curMonthCPI.getMom()),
+ 	        		curMonthCPI.getMonth(),trendOfVariation(curMonthPPI.getYoy()),trendOfVariation(curMonthPPI.getMom())
+ 	                );
+        }
         Sentence sentenceTemp = new Sentence(str);
+        sentenceTemp.setType(0); // 自主产生
         sentenceList.add(sentenceTemp);
+       
+        int nLargestMonth = new IndividualIndicatorComparison().numOfMonthCurrentIndicatorYoyBiggerThanPast(curMonthCPI, historicalMonthCPIList);
+        int nContinousMonth = new IndividualIndicatorComparison().numOfMonthContinousIncrease(curMonthCPI, historicalMonthCPIList);
+        System.out.println("创" + nLargestMonth + "月的新高");
+        System.out.println("连续" + nContinousMonth + "月持续增加");
+        
+       // if (nLargestMonth >=  )
+
+
+        
         firstParagraph.setSentences(sentenceList);
         //List<MonthCPI> historicalMonthCPIListCopy = new ArrayList<MonthCPI>();
     	//Collections.copy(historicalMonthCPIListCopy, historicalMonthCPIList);
-        /*
-		for(int i = 0; i < MyDate.month - 1; i++){
-			System.out.println("排序前"+i+"月的CPI同比是:" + historicalMonthCPIList.get(i).getYoy()+"\n");
-		}
-		
-		//Collections.sort(historicalMonthCPIList, new IndicatorYoyComparator());
-		
-		for(int i = 0; i < MyDate.month - 1; i++){
-			System.out.println("未排序的"+historicalMonthCPIList.get(i).getMonth() +
-					"月的CPI同比是:"+historicalMonthCPIList.get(i).getYoy() + "\n");
-		}
-		for(int i = 0; i < MyDate.month - 1; i++){
-			System.out.println("排序后"+historicalMonthCPIListCopy.get(i).getMonth() +
-					"月的CPI同比是:"+historicalMonthCPIListCopy.get(i).getYoy() + "\n");
-		}*/
+
 		
 		return firstParagraph;
 	}
 	
 	public String cpiTitleGenerator(){
-		String cpiTitle = null;
+		String cpiTitle = "";
 		//double cpiMomCurrent = curMonthCPI.getMom();
 		double cpiYoyCurrent = curMonthCPI.getYoy();
-		int idxLastMonth = historicalMonthCPIList.size()-1;
+		if(historicalMonthCPIList.size() >= 1){
+			int idxLastMonth = historicalMonthCPIList.size()-1;
 		//double cpiMomLastMonth = historyMonthCPIList.get(idxLastMonth).getMom();
-		double cpiYoyLastMonth = historicalMonthCPIList.get(idxLastMonth).getYoy();
-        cpiTitle = subTitleGenerator("居民消费价格(CPI)同比",cpiYoyCurrent, cpiYoyLastMonth);
+			double cpiYoyLastMonth = historicalMonthCPIList.get(idxLastMonth).getYoy();
+			cpiTitle = subTitleGenerator("居民消费价格(CPI)同比",cpiYoyCurrent, cpiYoyLastMonth);
+        }
+		else{
+			cpiTitle = "居民消费价格CPI同比" + trendOfVariation(curMonthCPI.getYoy());
+		}
 		return cpiTitle;
 	}
 	
 	public String ppiTitleGenerator(){
-		String ppiTitle = null;
+		String ppiTitle = "";
 		//double ppiMomCurrent = curMonthPPI.getMom();
 		double ppiYoyCurrent = curMonthPPI.getYoy();
-		int idxLastMonth = historicalMonthPPIList.size()-1;
-		//double ppiMomLastMonth = historyMonthPPIList.get(idxLastMonth).getMom();
-		double ppiYoyLastMonth = historicalMonthPPIList.get(idxLastMonth).getYoy();
-        ppiTitle = subTitleGenerator("PPI同比",ppiYoyCurrent, ppiYoyLastMonth);
+		if (historicalMonthCPIList.size() >= 1){
+			int idxLastMonth = historicalMonthPPIList.size()-1;
+			//double ppiMomLastMonth = historyMonthPPIList.get(idxLastMonth).getMom();
+			double ppiYoyLastMonth = historicalMonthPPIList.get(idxLastMonth).getYoy();
+			ppiTitle = subTitleGenerator("PPI同比",ppiYoyCurrent, ppiYoyLastMonth);
+		}else{
+			ppiTitle = "工业生产者出厂价格PPI" + trendOfVariation(curMonthPPI.getYoy());
+		}
 		return ppiTitle;
 	}
-	
-	public String titleGenerator(double curIndex, double lastMonthIndex){
-		String title = null;
-		/*if (curIndex > 0){
-			if(curIndex > lastMonthIndex){
-				if(lastMonthIndex > 0){
-					//title  = "CPI涨幅持续扩大";
-					if(curIndex < 2){
-						String [] titleList= {"物价涨幅持续温和","CPI涨幅持续扩大","CPI持续温和上涨"};
-					}else(curIndex < 3){
-						String [] titleList= {"物价涨幅持续温和"};
-					}else{
-						
-					}
-					
-				}else if(lastMonthIndex==0){
-					title  = "物价上涨";
-				}else{
-					title  = "涨幅由降转升";
-				}
-			}else if(curIndex == lastMonthIndex){
-				title  = "涨幅与上月持平";
-			}else{
-				title  = "涨幅回落";
-			}
-			
-		} else if(curIndex == 0){
-			if(curIndex > lastMonthIndex){
-				subTitle  = indexType + "降幅收窄";
-			}else if(curIndex == lastMonthIndex){
-				subTitle  = indexType + "与上月持平";
-			}else{
-				subTitle  = indexType + "涨幅回落";
-			}
-		}else{
-			if(curIndex > lastMonthIndex){
-				subTitle  = indexType + "降幅收窄";
-			}else if(curIndex == lastMonthIndex){
-				subTitle  = indexType + "与上月持平";
-			}else{
-				subTitle  = indexType + "降幅扩大";
-			}	
-		}*/
-		return title;
-	}
-
-	
+		
 	public String subTitleGenerator(String indexType, double curIndex, double lastMonthIndex){
 		String subTitle;
 		if (curIndex > 0){

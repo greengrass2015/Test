@@ -14,14 +14,14 @@ import com.github.cyl.autonews.dao.quotation.QuotationDao;
 import com.yicai.autonews.staticclass.MyDate;
 
 
-public class QuotationCsvFileExport {
+public class CsvFileExport {
 
-	public void exportQuotationsToCsv(List<String> oneYearQuotation, String outpath){
+	public void exportQuotationsToCsv(List<String> oneYearQuotation, String outpath, CSVFormat format){
 		//取数据
 		//List<String> strList = quotationDao.getOneQuotations(2015, 8);
 		//数据输出
 		File file = new File(outpath);
-		CSVFormat format = CSVFormat.DEFAULT.withRecordSeparator('\n'); // 每条记录间隔符
+		//CSVFormat format = CSVFormat.DEFAULT.withRecordSeparator(null); // 每条记录间隔符
 		if (file.exists()) {
 			file.delete();
 		}
@@ -51,7 +51,7 @@ public class QuotationCsvFileExport {
 			String record = recordsList.get(i);
 			try {
 				printer.printRecord(record);
-				System.out.println(record);
+				//System.out.println(record);
 				} catch (IOException e) {
 					throw new RuntimeException("Writing to csv file fails", e);
 				}

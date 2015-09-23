@@ -32,8 +32,8 @@ public class CSVFileUtil {
 	       
 	        int i = 0;  
 	        while((temp=br.readLine()) != null){  
-	            System.out.print(++i + "  ");  
-	            System.out.println(temp); 
+	     //       System.out.print(++i + "  ");  
+	      //      System.out.println(temp); 
 	            strList.add(temp);
 	        }  
 	        br.close();  

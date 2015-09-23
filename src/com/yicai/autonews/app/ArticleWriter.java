@@ -18,68 +18,21 @@ import com.github.cyl.autonews.pojo.ppi.MonthPPI;
 import com.yicai.autonews.staticclass.MyDate;
 import com.yicai.autonews.article.assemble.ArticleAssemble;
 import com.yicai.autonews.article.writer.*;
-import com.yicai.autonews.calculation.IndicatorYoyComparator;
-import com.yicai.autonews.cvsfile.QuotationCsvFileExport;
+import com.yicai.autonews.articlegenerator.ArticleGenerator;
+import com.yicai.autonews.calculation.IndividualIndicatorYoyComparator;
+import com.yicai.autonews.cvsfile.CsvFileExport;
 
-
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 public class ArticleWriter {
 	public static void main(String[] args) {
 		int year = 2015;
-		int month = 8;
-		new MyDate(year, month);
-		MonthCPI curMonthCPI = new CPIDao().getOneMonthCPI(year, month);
-		// monthCPITemp;
-		List<MonthCPI> historicalMonthCPIList = new ArrayList<MonthCPI>();
-		for (int i = 1; i < month; i++) {
-			MonthCPI monthCPITemp = new CPIDao().getOneMonthCPI(year, i);
-			historicalMonthCPIList.add(monthCPITemp);
-		}
-		MonthPPI curMonthPPI = new PPIDao().getOneMonthPPI(year, month);
-		// MonthPPI monthPPITemp;
-		List<MonthPPI> historicalMonthPPIList = new ArrayList<MonthPPI>();
-		for (int i = 1; i < month; i++) {
-			MonthPPI monthPPITemp = new PPIDao().getOneMonthPPI(year, i);
-			historicalMonthPPIList.add(monthPPITemp);
-		}
-	    QuotationDao quotationDao = new QuotationDao();
-			List<String> list = quotationDao.getOneQuotations(2015, 8);
-			for(int i = 0; i < list.size(); i++){
-				System.out.println(list.get(i));
-		}
-		QuotationCsvFileExport quotationExport = new QuotationCsvFileExport() ;
-		String outpath = "quotations.csv";
-		quotationExport.exportQuotationsToCsv(list, outpath);
+		int month = 4;
+		ArticleGenerator articleGenerator = new ArticleGenerator();
+		articleGenerator.newsArticle(year, month);
+		//sentence Type: 1   余秋梅专家解读   2 经济学家评论  0：自主产生
 		
-        Article analysisOfStats = new AnalysisDao().getOneAnalysisArticle(year, month);
-		TemplateWriter templateWriter = new TemplateWriter(historicalMonthCPIList, historicalMonthPPIList, curMonthCPI,
-				curMonthPPI);
 		
-		String cpiCommentFile = "cpiComments.csv";
-		String ppiCommentFile = "ppiComments.csv";
-		Article newsArticle =  new ArticleAssemble(analysisOfStats, templateWriter,
-				cpiCommentFile, ppiCommentFile).articleAssemble();
-		
-		List<Section> sectionList = newsArticle.getSections();
-		
-		String strOfArticle;
-		for(int i = 0; i < sectionList.size(); i++){
-			Section section = sectionList.get(i);
-			System.out.println(section.getSubTitle());
-			List<Paragraph> paragraphList = section.getParagraphs();
-			for(int j = 0; j < paragraphList.size(); j++){
-				Paragraph paragraph = paragraphList.get(j);
-				List<Sentence> sentenceList = paragraph.getSentences();
-				for(int k = 0; k < sentenceList.size(); k++){
-					Sentence sentence = sentenceList.get(k);
-					System.out.println(sentence.getSentence());
-				}
-			}
-			
-		}
-
-
-
-
 	}
 
 }
